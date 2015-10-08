@@ -14,7 +14,7 @@ from fake_useragent import UserAgent  # Hehe
 ARTIST_URL = 'http://wikiart.org/en/{artist}/mode/all-paintings/{page}'
 IMG_URL = 'http://uploads4.wikiart.org/images/{artist}/{painting}/jpg'
 ARTISTS = ['vincent-van-gogh']
-FAKE_HEADERS = {'User-Agent': UserAgent().chrome}
+FAKE_HEADERS = {'User-Agent': UserAgent().random}
 IMG_DIR = '../wikiart/{artist}'
 BASE_DIR = IMG_DIR.format(artist='')
 
