@@ -1,0 +1,36 @@
+\newcommand{\etalchar}[1]{$^{#1}$}
+\begin{thebibliography}{KHW{\etalchar{+}}13}
+
+\bibitem[GEB15]{gatys15}
+Leon~A. Gatys, Alexander~S. Ecker, and Matthias Bethge.
+\newblock A neural algorithm of artistic style.
+\newblock {\em CoRR}, abs/1508.06576, 2015.
+ \begin{quotation}\noindent The most important article detailing the algorithm
+  for replicating painting styles. \end{quotation}
+
+\bibitem[JHB{\etalchar{+}}08]{johnson08}
+C.R. Johnson, E.~Hendriks, I.J. Berezhnoy, E.~Brevdo, S.M. Hughes,
+  I.~Daubechies, Jia Li, E.~Postma, and J.Z. Wang.
+\newblock Image processing for artist identification.
+\newblock {\em Signal Processing Magazine, IEEE}, 25(4):37--48, July 2008.
+ \begin{quotation}\noindent Survey of a related problem of training a
+  classifier to identify the artist of an image. \end{quotation}
+
+\bibitem[JSD{\etalchar{+}}14]{jia14}
+Yangqing Jia, Evan Shelhamer, Jeff Donahue, Sergey Karayev, Jonathan Long,
+  Ross~B. Girshick, Sergio Guadarrama, and Trevor Darrell.
+\newblock Caffe: Convolutional architecture for fast feature embedding.
+\newblock {\em CoRR}, abs/1408.5093, 2014.
+ \begin{quotation}\noindent Original paper describing the Caffe deep learning
+  framework which we'll be using to implement our algorithm. \end{quotation}
+
+\bibitem[KHW{\etalchar{+}}13]{karayev14}
+Sergey Karayev, Aaron Hertzmann, Holger Winnemoeller, Aseem Agarwala, and
+  Trevor Darrell.
+\newblock Recognizing image style.
+\newblock {\em CoRR}, abs/1311.3715, 2013.
+ \begin{quotation}\noindent CV article detailing how neural networks can be
+  used to identify the style rather than the content of the image.
+  \end{quotation}
+
+\end{thebibliography}

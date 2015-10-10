@@ -1,0 +1,93 @@
+\documentclass[letterpaper,10pt]{article}
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{enumerate}
+\usepackage{caption}
+% \usepackage{natbib}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{enumerate}
+\usepackage[margin=1in]{geometry}
+\pagestyle{fancy}
+\lhead{Jesse Mu, Andrew Francl}
+\rhead{CSCI3341 Project Proposal}
+
+\begin{document}
+
+\section*{Imitating famous artists with convolutional neural networks}
+
+We propose to develop a machine learning system modeled after an algorithm in a
+recent paper by Gatys et al \cite{gatys15}. The algorithm in the paper
+describes a convolutional neural network algorithm that enables any given
+photograph to be recreated in the style of famous paintings. Specifically, the
+algorithm is able to take a painting and learn its stylistic composition rather
+than its content, then apply this stylistic information to a new image to
+create a new version of the image that stylistically matches the original
+painting. We have multiple hopes for this project which depend on how much we
+are able to complete in our specified time:
+
+\begin{itemize}
+  \item (Fallback) Create a command-line tool using the Caffe \cite{jia14} deep learning
+    framework to recreate the algorithm demonstrated in the paper. Open source
+    implementations of the algorithm using Lua and Torch do
+    exist\footnote{e.g.\ \href{https://github.com/jcjohnson/neural-style}{https://github.com/jcjohnson/neural-style}}
+    but we'll be building an original implementation starting from the paper
+    in Python to gain a better understanding of how the system works.
+  \item (Target) Expand upon the original algorithm in the paper by attempting
+    to recreate images not in the style of a single famous painting but by the
+    style of an artist oeuvre. This will require either 1) learning a stylistic
+    representation of an artist's lifetime work by training a network on not
+    just one, but many paintings, or 2) stochastically chosing a painting or
+    set of paintings on which to recreate a picture.
+  \item (Stretch) Create a web application that allows for any user to choose
+    an artist, upload an image, and obtain a stylistically transformed version
+    of the image. The limiting factor I forsee is that the computation required
+    for an individual picture may be too much to make this website available to
+    the public without paying for a cloud computing service like Amazon EC2.
+\end{itemize}
+
+Deliverables include a GitHub repository of all of the work we'll complete this
+semester, including a pdf writeup of the steps taken in implementing our system, the Python and Caffe code, and instructions and examples.
+
+\subsection*{Helpful topics from the AI course}
+
+\begin{itemize}
+    \item Machine learning, and specifically artificial neural networks. We will be
+    building particularly advanced models of ANNs to handle image processing tasks.
+    \item Probability can be used to incorporate random elements into the
+      processing of the images (e.g.\ controlling style versus content
+      tradeoffs, perhaps randomly selecting paintings)
+\end{itemize}
+
+\subsection*{Challenges}
+
+\begin{itemize}
+    \item The principal challenge is not only understanding the paper's
+      algorithm, but extending it to incorporate the stylistic content of a
+      complete body of images. From a technical perspective, this involves
+      training the CNN in charge of handling style with many images of a single
+      artist, which will also require a fundamental understanding of how the
+      network works.
+    \item Conceptually, it's unclear whether the stylistic information derived
+      from training the network on several images will result in a general
+      sense of an artist's style, or a confusing and meaningless average of an
+      artist's work. For example, some artists vary in style considerably over
+      their careers. If the latter, we need to make decisions about
+      how to obtain a sensible stylistic representation. It may be useful to
+      limit the training images to a specific subset of similar paintings.
+    \item One challenge will be optimizing computation time. CNNs are
+      computationally intensive and can take significant time to train.
+      Optimizations on both the software level, such as saving model
+      parameters, and the hardware level, such as enabling CUDA GPU
+      computation, must be taken into account when designing our system.
+\end{itemize}
+
+
+\nocite{*} % Include all references in bib
+\bibliographystyle{annotate}
+\bibliography{proposal}{}
+
+\end{document}
