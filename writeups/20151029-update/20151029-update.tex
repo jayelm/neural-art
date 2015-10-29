@@ -58,7 +58,8 @@ up on the Caffe and pycaffe framework, from which we will do more intensive
 computation. Download the VGG-19 Caffe model used in \cite{gatys15}. Write
 utility script to scrape artwork from WikiArt, and download art for one or two
 preliminary artists. (Done)
-\paragraph{Milestone 2 (11/12)} Complete base functionality to recreate an image based
+\paragraph{Milestone 2 (11/12)} Develop command line tool implementing base
+functionality as described in the paper: recreating an image based
 on the style of a single image.
 \paragraph{Milestone 3 (12/3)} Enhanced functionality: develop support for
 recreating an image based on preconfigured artist style representations. For
@@ -67,8 +68,13 @@ Polish and finalize CLI tool.
 
 \subsection*{Progress}
 As described in Milestone 1, we've already set up the infrastructure required
-to begin developing the original algorithm described in the paper. Because our
-laptops aren't particularly powerful, I purchased a temporary Linux server with
+to begin developing the original algorithm described in the paper. We wrote a
+Python script to scrape artwork from WikiArt, and downloaded the entire corpus
+of Van Gogh's work, nearly 2000 images. The script is extensible and can
+download artwork from any artist.
+
+Because our
+laptops aren't particularly powerful, We purchased a temporary Linux server with
 some student credit via DigitalOcean\footnote{\href{https://www.digitalocean.com/}{https://www.digitalocean.com/}}, and set up Caffe. We've done preliminary
 investigation on the downloaded VGG-19 network on an iPython notebook,
 including initializing the VGG network, loading images, creating a
