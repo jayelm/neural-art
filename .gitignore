@@ -58,3 +58,6 @@ target/
 
 # No wikiart files
 wikiart/*
+
+# Models
+models/
