@@ -13,7 +13,7 @@ from fake_useragent import UserAgent  # Hehe
 # Global constants
 ARTIST_URL = 'http://wikiart.org/en/{artist}/mode/all-paintings/{page}'
 IMG_URL = 'http://uploads4.wikiart.org/images/{artist}/{painting}/jpg'
-ARTISTS = ['vincent-van-gogh']
+ARTISTS = ['pablo-picasso']
 FAKE_HEADERS = {'User-Agent': UserAgent().random}
 IMG_DIR = '../wikiart/{artist}'
 BASE_DIR = IMG_DIR.format(artist='')
@@ -69,7 +69,8 @@ def save_painting(link, directory):
 
     # Get name by splitting on slash and getting the last element
     img_name = link.split('/')[-1]
-    print u"Saving img {} in directory {}".format(img_name, directory + '/')
+    # Unicode error screwing this up
+    # print u"Saving img %s in directory %s" % (unicode(img_name), directory + '/')
     with open(directory + '/' + img_name, 'wb') as fout:
         fout.write(r_img.content)
 
