@@ -1,0 +1,50 @@
+//
+// nn.dot
+//
+// Created on 11-12-2015 by jayelm
+//
+digraph nn {
+    rankdir="LR";
+
+    node [shape="none"] input;
+    node [shape="circle", label=""] i1; i2; i3; i4;
+
+    input -> i1;
+    input -> i2;
+    input -> i3;
+    input -> i4;
+
+    node [shape="circle", label=""];
+    i1 -> h1;
+    i1 -> h2;
+    i1 -> h3;
+    i1 -> h4;
+    i1 -> h5;
+
+    i2 -> h1;
+    i2 -> h2;
+    i2 -> h3;
+    i2 -> h4;
+    i2 -> h5;
+
+    i3 -> h1;
+    i3 -> h2;
+    i3 -> h3;
+    i3 -> h4;
+    i3 -> h5;
+
+    i4 -> h1;
+    i4 -> h2;
+    i4 -> h3;
+    i4 -> h4;
+    i4 -> h5;
+
+    h1 -> o1;
+    h2 -> o1;
+    h3 -> o1;
+    h4 -> o1;
+    h5 -> o1;
+
+    node [shape="none", label="output"] output;
+    o1 -> output;
+}
