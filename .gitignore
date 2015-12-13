@@ -60,4 +60,4 @@ target/
 wikiart/*
 
 # Models
-models/
+models/*caffemodel
