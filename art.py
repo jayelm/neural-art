@@ -53,8 +53,8 @@ class Art(object):
     def __init__(self, net, args):
         self.net = net
 
-        self.transformer = self.create_transformer(None)
-        
+        self.transformer = self.create_transformer()
+
         # These values will be initialized when
         # network is setup (set_style_targets, set_content_targets)
         self.style_targets = None
@@ -71,7 +71,7 @@ class Art(object):
         reversed_layers.reverse()
 
         self.reversed_pairs = list(izip_longest(reversed_layers,
-                                           reversed_layers[1:]))
+                                                reversed_layers[1:]))
 
         self.max_width = args.width
 
@@ -84,7 +84,14 @@ class Art(object):
         # TODO: Get rid of this when you've kept things separate.
         self.args = args
 
-    def create_transformer(self, options):
+        # Set counter for printing progress in graddesc
+        self.iter = 0
+
+    def create_transformer(self):
+        """
+        Create the preprocessor and deprocessor using the default settings for
+        the VGG-19 network.
+        """
         # Give transformer necessary imput shape. Should be specified from
         # argparse arguments when creating the net
         transformer = caffe.io.Transformer(
@@ -131,13 +138,13 @@ class Art(object):
             Filename of the image to load in.
         """
         target_sl_list = []
-        for sl, weight in zip(STYLE_LAYERS, STYLE_WEIGHTS):
+        for sl, _ in zip(STYLE_LAYERS, STYLE_WEIGHTS):
 
             sl_dim0 = self.net.blobs[sl].data[0].shape[0]
             target_sl = np.zeros((sl_dim0, sl_dim0))
 
             for img, imgweight in zip(imgs, weights):
-                # Preproces image, load into net
+                # Preprocess image, load into net
                 stylei = caffe.io.load_image(img)
                 # Resize image, set net and transformer shapes accordingly
                 scaled = self.resize_image(stylei, self.style_scale)
@@ -148,27 +155,28 @@ class Art(object):
 
                 self.net.forward()
 
-            layer = self.net.blobs[sl].data[0].copy()  # Get one batch?
-            # Expand style layer to 2d array
-            layer = np.reshape(layer, (layer.shape[0], layer.shape[1] * layer.shape[2]))
+                layer = self.net.blobs[sl].data[0].copy()  # Get one batch?
+                # Expand style layer to 2d array
+                layer = np.reshape(layer,
+                                   (layer.shape[0],
+                                    layer.shape[1] * layer.shape[2])
+                                  )
 
-            gram = self._gram(layer)
+                gram = self._gram(layer)
 
-            # Commented out for consecutive image runs on network
-            # target_sl += gram * imgweight
+                target_sl += gram * imgweight
 
-            target_sl_list.append(gram)
+                target_sl_list.append(gram)
 
         self.style_targets = target_sl_list
 
-        # Set counter for printing progress in graddesc
-        self.iter = 0
-
     def set_content_target(self, img):
+        """
+        Create content representation of image and set as the content target.
+        """
         # XXX: Assume only one content layer
         cl = CONTENT_LAYERS[0]
         contenti = caffe.io.load_image(img)
-        self.contenti = contenti.copy()
         # Resize image, set net and transformer shapes accordingly
         scaled = self.resize_image(contenti)
         self.resize_caffes(scaled)
@@ -180,8 +188,9 @@ class Art(object):
         self.content_target = self.net.blobs[cl].data[0].copy()
         # Get contenti_pp (after transformer)
         self.content_target = (
-            np.reshape(self.content_target, (self.content_target.shape[0],
-                                             self.content_target.shape[1] * self.content_target.shape[2]))
+            np.reshape(self.content_target,
+                       (self.content_target.shape[0],
+                        self.content_target.shape[1] * self.content_target.shape[2]))
         )
 
     def random_image(self):
@@ -203,7 +212,7 @@ class Art(object):
         """
         gram = blas.sgemm(1.0, layer, layer.T)
         return gram
-    
+
     def _mse(self, A, B):
         return ((A - B) ** 2).mean()
 
@@ -331,18 +340,20 @@ class Art(object):
         """
         if (self.iter % self.print_rate) == 0:
             debug_print("gdesc iteration {}".format(str(self.iter)))
-            new_img = self.transformer.deprocess('data', x.reshape(self.net.blobs['data'].data.shape))
+            new_img = self.transformer.deprocess(
+                'data',
+                x.reshape(self.net.blobs['data'].data.shape)
+            )
             imsave(
                 '{}/iter-{}.jpg'.format(self.dirname, self.iter),
                 skimage.img_as_ubyte(new_img)
             )
         self.iter += 1
 
-
     def go(self, maxiter=512):
         """
         This is where the magic happens.
-        
+
         Return the image resulting from gradient descent for maxiter
         iterations
         """
@@ -373,6 +384,9 @@ class Art(object):
 
 
 def debug_print(msg, verbose=True):
+    """
+    Print msg only if verbose flag is True.
+    """
     if verbose:
         print "{}: {}".format(datetime.now(), msg)
 
@@ -483,13 +497,13 @@ if __name__ == '__main__':
                               # "content image."))
     # TODO: Output location options?
 
-    if args.artist and style_images:
+    args = parser.parse_args()
+
+    if args.artist and args.style_images:
         sys.exit("art.py: can't use both individual style "
                  "images and artist flag")
-    if not args.artist and not style_images:
+    if not args.artist and not args.style_images:
         sys.exit("art.py: need to specify either an artist or "
                  "style images")
-
-    args = parser.parse_args()
 
     main(args)
