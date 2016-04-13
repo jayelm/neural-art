@@ -4,15 +4,10 @@ Implementation of A Neural Algorithm of Artistic Style
 authors: Jesse Mu, Andrew Francl
 """
 
-# Make matplotlib not use X11 (not necessary)
 import matplotlib
-matplotlib.use('Agg')
-
 import numpy as np
 
 import caffe
-# GPU mode
-caffe.set_mode_gpu()
 
 # Numerical computation
 from scipy import optimize
@@ -30,6 +25,11 @@ from datetime import datetime
 import os
 import glob
 
+# Make matplotlib not use X11
+matplotlib.use('Agg')
+# Set Caffe gpu mode
+caffe.set_mode_gpu()
+
 # Constants
 VGG_MODEL = './models/VGG_ILSVRC_19_layers.caffemodel'
 VGG_PROTOTXT = './models/VGG_ILSVRC_19_layers_deploy.prototxt'
@@ -45,6 +45,7 @@ STYLE_LAYERS = ['conv1_1', 'conv2_1', 'conv3_1', 'conv4_1', 'conv5_1']
 # TODO: Make these weights configurable
 CONTENT_WEIGHTS = [1. / len(CONTENT_LAYERS)] * len(CONTENT_LAYERS)
 STYLE_WEIGHTS = [1. / len(STYLE_LAYERS)] * len(STYLE_LAYERS)
+
 
 class Art(object):
     """
@@ -108,7 +109,6 @@ class Art(object):
 
         return transformer
 
-
     def resize_image(self, img, scale=1.0):
         """
         Resize image to self.max_width, with varying height.
@@ -157,10 +157,10 @@ class Art(object):
 
                 layer = self.net.blobs[sl].data[0].copy()  # Get one batch?
                 # Expand style layer to 2d array
-                layer = np.reshape(layer,
-                                   (layer.shape[0],
-                                    layer.shape[1] * layer.shape[2])
-                                  )
+                layer = np.reshape(
+                    layer,
+                    (layer.shape[0], layer.shape[1] * layer.shape[2])
+                )
 
                 gram = self._gram(layer)
 
@@ -188,9 +188,10 @@ class Art(object):
         self.content_target = self.net.blobs[cl].data[0].copy()
         # Get contenti_pp (after transformer)
         self.content_target = (
-            np.reshape(self.content_target,
-                       (self.content_target.shape[0],
-                        self.content_target.shape[1] * self.content_target.shape[2]))
+            np.reshape(
+                self.content_target,
+                (self.content_target.shape[0],
+                 self.content_target.shape[1] * self.content_target.shape[2]))
         )
 
     def random_image(self):
@@ -214,6 +215,7 @@ class Art(object):
         return gram
 
     def _mse(self, A, B):
+        """Mean squared error."""
         return ((A - B) ** 2).mean()
 
     def style_lag(self, noisies, grams, i, compute_grad=False):
@@ -232,11 +234,13 @@ class Art(object):
         weight = STYLE_WEIGHTS[i]
 
         diff = (style_gram - style_target)
-        size_c = 1. / ((style_noisy.shape[0] ** 2) * (style_noisy.shape[1] ** 2))
+        size_c = (1. / ((style_noisy.shape[0] ** 2) *
+                  (style_noisy.shape[1] ** 2)))
         loss = (size_c / 4) * (diff**2).sum() * weight
 
         if compute_grad:
-            gradient = size_c * blas.sgemm(1.0, diff, style_noisy) * (style_noisy > 0) * weight
+            gradient = (size_c * blas.sgemm(1.0, diff, style_noisy) *
+                        (style_noisy > 0) * weight)
             return loss, gradient
 
         return loss, None
@@ -257,15 +261,17 @@ class Art(object):
     def loss_and_gradient(self, x):
         debug_print("Running loss and gradient")
         x_reshaped = np.reshape(x, self.net.blobs['data'].data.shape[1:])
-        print x
 
         # Run the net on the candidate
         self.net.blobs['data'].data[...] = x_reshaped.copy()
         self.net.forward()
 
         content_noisy = self.net.blobs[CONTENT_LAYERS[0]].data[0].copy()
-        content_noisy = np.reshape(content_noisy, (content_noisy.shape[0],
-                                                   content_noisy.shape[1] * content_noisy.shape[2]))
+        content_noisy = np.reshape(
+            content_noisy,
+            (content_noisy.shape[0],
+             content_noisy.shape[1] * content_noisy.shape[2])
+        )
 
         # COMPUTE LOSSES
         # For the first iteration, we don't care about the gradients.
@@ -348,6 +354,10 @@ class Art(object):
                 '{}/iter-{}.jpg'.format(self.dirname, self.iter),
                 skimage.img_as_ubyte(new_img)
             )
+            imsave(
+                '{}/final.jpg'.format(self.dirname, self.iter),
+                skimage.img_as_ubyte(new_img)
+            )
         self.iter += 1
 
     def go(self, maxiter=512):
@@ -367,12 +377,20 @@ class Art(object):
             self.resize_caffes(scaled)
             img = self.transformer.preprocess('data', scaled)
 
-        # TODO: compute bounds for gradient descent!
+        # Compute bounds for gradient descent, borrowed from
+        # fzliu/style-transfer
+        data_min = -self.transformer.mean["data"][:, 0, 0]
+        data_max = data_min + self.transformer.raw_scale["data"]
+        data_bounds = [(data_min[0], data_max[0])] * (img.size / 3) + \
+                      [(data_min[1], data_max[1])] * (img.size / 3) + \
+                      [(data_min[2], data_max[2])] * (img.size / 3)
+
         debug_print("Starting grad descent")
 
         x, f, d = optimize.fmin_l_bfgs_b(
             self.loss_and_gradient,
             img.flatten(),
+            bounds=data_bounds,
             fprime=None,  # We'll use loss_and_gradient
             maxiter=maxiter,
             callback=self.print_prog,
@@ -466,10 +484,13 @@ def main(args):
     debug_print("Done: Saved {}".format(dirname))
 
 if __name__ == '__main__':
-    from argparse import ArgumentParser
+    from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
     import sys
 
-    parser = ArgumentParser()
+    parser = ArgumentParser(
+        description="Neural art in Python.",
+        formatter_class=ArgumentDefaultsHelpFormatter
+    )
 
     parser.add_argument('content_image', help="Content image")
     parser.add_argument('style_images', nargs='*',
@@ -492,11 +513,10 @@ if __name__ == '__main__':
                         help=("Resize style image - changes resolution of "
                               "features"))
     # parser.add_argument('-c' '--color-transfer', action='store_true',
-                        # help=("Apply color transfer algorithm to attempt to "
-                              # "change style image to match color of the "
-                              # "content image."))
+    #                   # help=("Apply color transfer algorithm to attempt to "
+    #                         # "change style image to match color of the "
+    #                         # "content image."))
     # TODO: Output location options?
-
     args = parser.parse_args()
 
     if args.artist and args.style_images:
