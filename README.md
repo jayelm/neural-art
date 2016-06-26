@@ -11,6 +11,19 @@ Make sure to download models with the `util/download_models.sh` script first. Th
 
 ## Examples
 
+Create a (low quality) version of the image below. The first positional
+argument is the content image and the image(s) after are the style
+images. The further options instruct the algorithm to run for 200 iterations
+and output an image with a 256px maximum width, which should be doable
+relatively quickly on a personal computer.
+
+    python art.py examples/gasson.jpg examples/starry.jpg -n 200 -w 256
+
+Further options include using the entire oeuvre of an artist as a stylistic
+target (which never works well), scaling the stylistic features by a factor,
+specifying whether to initialize the candidate image from random noise or the
+content image, and more. See the script's help for details.
+
 The best [Gassongram](https://www.instagram.com/explore/tags/gassongram/) ever:
 
 ![gasson](https://raw.githubusercontent.com/jayelm/neural-art/master/examples/gasson.jpg)
